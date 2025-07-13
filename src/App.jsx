@@ -676,10 +676,60 @@ const NewPerfumeModal = ({ onClose, onAdd }) => {
     const handleFetch = async () => {
         if (!brand || !scent) return;
         setIsFetching(true);
-        const fetchedDetails = await fetchNewPerfumeDetails(brand, scent);
-        setDetails(fetchedDetails);
-        setIsFetching(false);
-        setStep(2);
+        
+        const prompt = `For the perfume '${scent}' by '${brand}', provide the following information in JSON format: estimated price per ml in GBP (as a number), top notes (as a string), middle notes (as a string), and base notes (as a string).`;
+        
+        try {
+            const apiKey = ""; // Leave empty
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+            const schema = {
+                type: "OBJECT",
+                properties: {
+                    price: { "type": "NUMBER" },
+                    topNotes: { "type": "STRING" },
+                    middleNotes: { "type": "STRING" },
+                    baseNotes: { "type": "STRING" },
+                }
+            };
+            const payload = {
+                contents: [{ role: "user", parts: [{ text: prompt }] }],
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: schema
+                }
+            };
+
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                throw new Error(`API request failed with status ${response.status}`);
+            }
+
+            const result = await response.json();
+            
+            if (result.candidates && result.candidates[0] && result.candidates[0].content.parts[0]) {
+               const fetchedDetails = JSON.parse(result.candidates[0].content.parts[0].text);
+               setDetails(fetchedDetails);
+            } else {
+                 throw new Error("Invalid response structure from API.");
+            }
+
+        } catch (error) {
+            console.error("AI Fetch Error:", error);
+            setDetails({
+                price: 1.5,
+                topNotes: 'Could not fetch.',
+                middleNotes: 'Please edit manually.',
+                baseNotes: 'Please edit manually.',
+            });
+        } finally {
+            setIsFetching(false);
+            setStep(2);
+        }
     };
 
     const handleAddPerfume = () => {
