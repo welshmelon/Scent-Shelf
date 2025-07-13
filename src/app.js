@@ -3,8 +3,6 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from 'firebase/auth';
 import { getFirestore, collection, onSnapshot, addDoc, doc, updateDoc, deleteDoc, setLogLevel } from 'firebase/firestore';
 
-// --- INITIAL DATA ---
-// Pre-loaded with your entire collection, now including a 'dateBought' field.
 const today = '2025-07-13';
 const initialPerfumes = [
     { id: '1', brand: 'Acampora Profumi', scent: 'Ou', price: 2.5, category: 'Full Bottle (Cool)', season: 'Cool Weather', rotationMonths: 'Nov, Jan', dayEvening: 'Evening', specialOccasion: true, topNotes: 'Oud, Floral Notes', middleNotes: 'Amber', baseNotes: 'Oud, Woody Notes', quantity: 50, maxQuantity: 50, status: 'active', dateBought: today },
